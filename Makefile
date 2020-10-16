@@ -4,4 +4,4 @@ all : comp
 
 
 comp : 
-	$(CC) -o spoof main.c dns_reflection.c utilities.c
+	$(CC) -g -o spoof main.c dns_reflection.c utilities.c dns.c

