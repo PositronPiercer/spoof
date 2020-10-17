@@ -5,6 +5,10 @@
 
 int main (void)
 {	
+	if(getuid()){
+		printf("I want to run as root!\n");
+      	exit(EXIT_FAILURE);
+   }
 	FILE * banner = fopen ("banner.txt", "r");
 	fseek(banner, 0, SEEK_END);
 	long fsize = ftell(banner);
@@ -16,7 +20,8 @@ int main (void)
 
 	string[fsize] = 0;
 	printf("%s\n", string);
-	dns_reflection_setup();
+	//dns_reflection_setup();
+	smurf_setup();
 	
 	return 0;
 }

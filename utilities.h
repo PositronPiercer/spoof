@@ -82,3 +82,7 @@ typedef struct
 extern int dns_payload_gen(char * payload, unsigned char *host , int query_type);
 //-------------------------------------------checksum----------------------------------
 extern unsigned short csum(unsigned short *ptr,int nbytes);
+
+//--------------------------------------------SMURF---------------------------------------
+
+extern unsigned short in_cksum(unsigned short* addr, int len);

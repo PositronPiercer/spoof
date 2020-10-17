@@ -153,6 +153,7 @@ void dns_reflection(char * victimIP, int victimPort, int query_type, int nPacket
 			nPacketsSent++;
 		}
 	}
+	close(s);
 	printf("Attack completed. %d packets sent.\n", nPacketsSent);
 
 }
