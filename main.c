@@ -1,7 +1,7 @@
 #include "attackers.h"
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <unistd.h>
 
 int main (void)
 {	
@@ -21,7 +21,8 @@ int main (void)
 	string[fsize] = 0;
 	printf("%s\n", string);
 	//dns_reflection_setup();
-	smurf_setup();
+	//smurf_setup();
+	syn_flood_setup();
 	
 	return 0;
 }

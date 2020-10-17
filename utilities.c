@@ -23,3 +23,6 @@ unsigned short csum(unsigned short *ptr,int nbytes)
 	return(answer);
 }
 
+void random_ip_gen(char * ip){
+	
+}

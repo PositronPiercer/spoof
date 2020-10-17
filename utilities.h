@@ -86,3 +86,7 @@ extern unsigned short csum(unsigned short *ptr,int nbytes);
 //--------------------------------------------SMURF---------------------------------------
 
 extern unsigned short in_cksum(unsigned short* addr, int len);
+
+//-------------------------------------------SYN FLOOD----------------------------------
+
+extern void random_ip_gen(char * ip);
