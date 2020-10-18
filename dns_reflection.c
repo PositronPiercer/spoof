@@ -103,9 +103,6 @@ void dns_reflection(char * victimIP, int victimPort, int query_type, int nPacket
 	psh.placeholder = 0;
 	psh.protocol = IPPROTO_UDP;
 	
-	//initialize random rumber generator
-	time_t t;
-	srand((unsigned) time(&t));
 
 	int nPacketsSent = 0;
 

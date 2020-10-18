@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
 
 int main (void)
 {	
@@ -17,6 +18,10 @@ int main (void)
 	char *string = malloc(fsize + 1);
 	fread(string, 1, fsize, banner);
 	fclose(banner);
+
+	//initialise random number generator
+	time_t t;
+	srand((unsigned) time(&t));
 
 	string[fsize] = 0;
 	printf("%s\n", string);
