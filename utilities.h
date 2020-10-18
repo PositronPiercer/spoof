@@ -89,4 +89,4 @@ extern unsigned short in_cksum(unsigned short* addr, int len);
 
 //-------------------------------------------SYN FLOOD----------------------------------
 
-extern void random_ip_gen(char * ip);
+extern void random_ip_gen(char * ip, char ipClass);
