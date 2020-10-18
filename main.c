@@ -23,11 +23,28 @@ int main (void)
 	time_t t;
 	srand((unsigned) time(&t));
 
+	int choice = 0;
+
 	string[fsize] = 0;
 	printf("%s\n", string);
-	//dns_reflection_setup();
-	//smurf_setup();
-	syn_flood_setup();
+
+	printf ("__Available Attacks__\n");
+	printf ("1. DNS Reflection\n2. IP Smurf\n3. TCP SYN Flood\n");
+	printf ("\nEnter choice : ");
+
+	
+
+	scanf ("%d", &choice);
+
+	if (choice == 1){
+		dns_reflection_setup();
+	}
+	else if (choice == 2){
+		smurf_setup();
+	}
+	else if (choice == 3){
+		syn_flood_setup();
+	}
 	
 	return 0;
 }
