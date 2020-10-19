@@ -10,7 +10,7 @@ int main (void)
 		printf("I want to run as root!\n");
       	exit(EXIT_FAILURE);
    }
-	FILE * banner = fopen ("banner.txt", "r");
+	FILE * banner = fopen ("assets/banner.txt", "r");
 	fseek(banner, 0, SEEK_END);
 	long fsize = ftell(banner);
 	fseek(banner, 0, SEEK_SET);  /* same as rewind(f); */

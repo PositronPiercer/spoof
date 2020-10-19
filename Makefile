@@ -4,4 +4,4 @@ all : comp
 
 
 comp : 
-	$(CC) -g -o iwnm main.c dns_reflection.c utilities.c dns.c smurf.c syn_flood.c
+	$(CC) -g -o iwnm src/*.c -I include

