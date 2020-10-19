@@ -4,3 +4,4 @@ test.c
 test
 .gitignore
 syn_flood
+.vscode
